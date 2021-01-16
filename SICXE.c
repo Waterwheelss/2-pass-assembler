@@ -1130,7 +1130,7 @@ void insertTextRecord()
         }
         else if (init == true)
         {
-            if(first == true)
+            if (first == true)
             {
                 start_location = (int)strtol(LOCATION, NULL, 16);
 
@@ -1189,6 +1189,17 @@ void insertTextRecord()
         fgets(line, sizeof(line), output_file);
     }
 
+    newLine[0] = '\0';
+    strcat(newLine, "T");
+    location = (int)strtol(LOCATION, NULL, 16);
+    sprintf(temp, "%06X", prev_location);
+    sprintf(temp2, "%02X", location - prev_location);
+    prev_location = location;
+    strcat(newLine, temp);
+    strcat(newLine, temp2);
+    strcat(newLine, object_codes);
+    printf("object codes: %s\n", newLine);
+    fprintf(object_file, "%s\n", newLine);
     printf("object codes: %s\n", object_codes);
 
     // write relocate record.
