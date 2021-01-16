@@ -234,6 +234,8 @@ void main()
 
     // Exec pass 1 function
     pass1();
+
+    printf("PASS 1 FINISH... \n");
     fclose(input_file);
     fclose(pass1_output_file);
     fclose(symtab_file);
@@ -272,12 +274,15 @@ void main()
     }
     //Exec pass 2 function
     pass2();
+
+    printf("PASS 2 FINISH...\n");
 }
 
 void pass1()
 {
     char line[100];
     char copy_line[100];
+    int line_counter = 0;
 
     // Handle first line of the input
     fgets(line, sizeof(line), input_file);
@@ -296,6 +301,7 @@ void pass1()
         // Go to next line
         fgets(line, sizeof(line), input_file);
         lineHandler(line);
+        line_counter++;
     }
     else
     {
@@ -360,12 +366,14 @@ void pass1()
         }
         else
         {
-            printf("ERROR: Unable to get OPCODE.\n");
+            line_counter++;
+            printf("ERROR: Unable to get OPCODE. At line %d\n", line_counter);
             exit(0);
         }
         // Get next line
         fgets(line, sizeof(line), input_file);
         lineHandler(line);
+        line_counter++;
     }
 
     //File end.
@@ -584,7 +592,6 @@ void pass2()
     // Start loop until hit 'END'
     while (strcmp(OPCODE, "END"))
     {
-        printf("%s\n", line);
 
         // Check base, and save it's location into BASE variable
         if (!strcmp(OPCODE, "BASE"))
@@ -803,7 +810,6 @@ void convertToObject()
                 reg2_value = 0;
             }
 
-            printf("object code: %X%d%d\n", OPTAB[optab_index]->opcode, reg_value, reg2_value);
             insertOutputFile(OPTAB[optab_index]->opcode, reg_value, reg2_value, 2);
         }
         // Format 3
@@ -875,7 +881,6 @@ void convertToObject()
                 p = 0;
                 b = 1;
                 x = 1;
-                printCurrentLine();
                 int symbol_location = searchSymtab(OPERAND);
                 disp = symbol_location - BASE;
             }
@@ -976,7 +981,6 @@ void convertToObject()
             int first = OPTAB[optab_index]->opcode + (2 * n) + (1 * i);
             int second = (8 * x) + (4 * b) + (2 * p) + (1 * e);
 
-            printf("object code = %02X%X%05X\n", first, second, disp);
             insertOutputFile(first, second, disp, 4);
         }
     }
@@ -1119,12 +1123,10 @@ void insertTextRecord()
     while (strcmp(OPCODE, "END"))
     {
         textRecordLineHandler(line);
-        printCurrentLine();
 
         if (OBJECT_CODE[0] == '\0')
         {
             // do nothing
-            printf("do nothing here \n");
             fgets(line, sizeof(line), output_file);
             continue;
         }
@@ -1139,7 +1141,6 @@ void insertTextRecord()
             strcat(object_codes, OBJECT_CODE);
             location = (int)strtol(LOCATION, NULL, 16);
             prev_location = location;
-            printf("first obcode: t%s\n", object_codes);
         }
         else if (!strcmp(LABEL, "EOF"))
         {
@@ -1154,7 +1155,6 @@ void insertTextRecord()
             strcat(newLine, temp);
             strcat(newLine, temp2);
             strcat(newLine, object_codes);
-            printf("object codes: %s\n", newLine);
             fprintf(object_file, "%s\n", newLine);
             object_codes[0] = '\0';
 
@@ -1178,7 +1178,6 @@ void insertTextRecord()
             strcat(newLine, temp);
             strcat(newLine, temp2);
             strcat(newLine, object_codes);
-            printf("object codes: %s\n", newLine);
             fprintf(object_file, "%s\n", newLine);
             object_codes[0] = '\0';
 
@@ -1198,9 +1197,7 @@ void insertTextRecord()
     strcat(newLine, temp);
     strcat(newLine, temp2);
     strcat(newLine, object_codes);
-    printf("object codes: %s\n", newLine);
     fprintf(object_file, "%s\n", newLine);
-    printf("object codes: %s\n", object_codes);
 
     // write relocate record.
     int relocate_size = sizeof(RETAB) / sizeof(RETAB[0]);
@@ -1329,7 +1326,6 @@ void textRecordLineHandler(char *line)
 
         // Delete the white space.
         line = line + 1;
-        printf("line:%s", line);
         strcpy(OBJECT_CODE, line);
 
         return;
